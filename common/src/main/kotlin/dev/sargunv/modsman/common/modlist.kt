@@ -23,7 +23,7 @@ data class Modlist(
 
     companion object {
 
-        internal const val fileName = ".modlist.json"
+        const val fileName = ".modlist.json"
 
         internal val gson = GsonBuilder()
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
