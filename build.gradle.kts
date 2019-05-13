@@ -5,7 +5,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm") version "1.3.31" apply false
     idea
+    id("com.palantir.git-version") version "0.11.0"
 }
+
+val gitVersion: groovy.lang.Closure<Any> by extra
 
 allprojects {
     repositories {
@@ -15,7 +18,7 @@ allprojects {
 
 subprojects {
     group = "dev.sargunv.modsman"
-    version = "1.0-SNAPSHOT"
+    version = gitVersion()
 }
 
 configure<IdeaModel> {

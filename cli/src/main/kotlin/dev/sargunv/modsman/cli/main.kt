@@ -4,6 +4,7 @@ import com.beust.jcommander.JCommander
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 import com.beust.jcommander.Parameters
+import dev.sargunv.modsman.BuildConfig
 import dev.sargunv.modsman.common.ModlistManager
 import dev.sargunv.modsman.common.Modsman
 import kotlinx.coroutines.FlowPreview
@@ -46,11 +47,11 @@ internal object RootCommand : CommandBase() {
 
     override suspend fun run(jc: JCommander): Int {
         return if (version) {
-            JCommander.getConsole().println("TODO")
+            JCommander.getConsole().println(BuildConfig.VERSION)
             0
         } else {
             jc.usage()
-            1
+            if (help) 0 else 1
         }
     }
 
@@ -192,10 +193,11 @@ fun main(args: Array<String>) {
     } catch (e: ParameterException) {
         if (RootCommand.help) {
             jc.parsedCommand?.let { jc.usage(it) } ?: jc.usage()
+            exitProcess(0)
         } else {
             JCommander.getConsole().println(e.message)
+            exitProcess(1)
         }
-        exitProcess(1)
     }
 
     val command = jc.commands[jc.parsedCommand]?.objects?.get(0) as CommandBase? ?: RootCommand

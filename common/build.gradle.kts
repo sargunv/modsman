@@ -3,6 +3,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     `maven-publish`
+    id("de.fuerstenau.buildconfig") version "1.1.8"
 }
 
 dependencies {

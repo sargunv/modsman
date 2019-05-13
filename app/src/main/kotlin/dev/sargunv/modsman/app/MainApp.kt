@@ -5,6 +5,7 @@ import javafx.application.Application
 import javafx.application.Platform
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
+import javafx.scene.image.Image
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import java.util.*
@@ -22,6 +23,7 @@ class MainApp : Application() {
 
         primaryStage.setOnCloseRequest { exitProcess(0) }
         primaryStage.title = "modsman"
+//        primaryStage.icons.add(Image(javaClass.getResourceAsStream("icon.png")))
         primaryStage.scene = scene
         primaryStage.show()
     }
