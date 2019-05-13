@@ -141,7 +141,7 @@ class MainController : Initializable {
         tableView.items.clear()
 
         modsman?.let {
-            path.text = "${it.modlist.modsPath}"
+            path.text = "${it.modlist.modsPath.toAbsolutePath()}"
             version.text = "MC ${it.modlist.config.gameVersion}"
             tableView.items.addAll(it.modlist.mods)
         }

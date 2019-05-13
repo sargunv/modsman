@@ -34,7 +34,8 @@ class MainApp : Application() {
     }
 
     private fun createModsman(stage: Stage): Modsman {
-        val path = chooseDirectory(stage)
+        val params = parameters.raw
+        val path = if (params.size >= 1) Path.of(params[0]) else chooseDirectory(stage)
         if (!Files.exists(path.resolve(Modlist.fileName))) {
             ModlistManager.init(path, chooseGameVersion()).close()
         }
