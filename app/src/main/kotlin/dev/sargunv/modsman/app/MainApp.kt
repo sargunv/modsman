@@ -8,6 +8,7 @@ import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
 import javafx.scene.control.TextInputDialog
+import javafx.scene.image.Image
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
 import java.nio.file.Files
@@ -43,7 +44,7 @@ class MainApp : Application() {
     override fun start(stage: Stage) {
         stage.setOnCloseRequest { exitProcess(0) }
         stage.title = title
-//        primaryStage.icons.add(Image(javaClass.getResourceAsStream("icon.png")))
+        stage.icons.add(Image(javaClass.getResourceAsStream("icon.png")))
 
         val fxmlLoader = FXMLLoader(
             javaClass.getResource("Main.fxml"),

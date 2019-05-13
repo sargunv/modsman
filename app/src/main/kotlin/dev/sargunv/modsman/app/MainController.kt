@@ -64,7 +64,6 @@ class MainController : Initializable {
             .filter { Files.isRegularFile(it) && Files.isReadable(it) && it.toString().endsWith(".jar") }
             .map { it.toAbsolutePath() }
             .filter { it !in installedJars }
-            .map { it.toString() }
             .toList()
         processWithStatus(
             getFlow = { matchMods(jars) },

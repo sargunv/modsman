@@ -10,6 +10,7 @@ import dev.sargunv.modsman.common.Modsman
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
+import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import kotlin.system.exitProcess
 
@@ -51,11 +52,19 @@ internal object RootCommand : CommandBase() {
             0
         } else {
             jc.usage()
-            if (help) 0 else 1
+            1
         }
     }
 
-    fun createModsman() = Modsman(Path.of(modsFolder), maxConcurrent)
+    fun createModsman(): Modsman {
+        try {
+            return Modsman(Path.of(modsFolder), maxConcurrent)
+        } catch (e: NoSuchFileException) {
+            JCommander.getConsole().println("Couldn't find file: ${e.message}")
+            JCommander.getConsole().println("Did you forget to run `modsman init`?")
+            exitProcess(1)
+        }
+    }
 }
 
 @Parameters(commandNames = ["init"], commandDescription = "initialize a new mod list")
@@ -138,7 +147,8 @@ internal object DiscoverCommand : CommandBase() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.matchMods(jarNames).collect {
+            val jarPaths = jarNames.map { Path.of(it) }
+            modsman.matchMods(jarPaths).collect {
                 println("Matched '${it.projectName}' to '${it.fileName}'")
             }
         }
@@ -162,7 +172,7 @@ internal object ListOutdatedCommand : CommandBase() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.getOutdatedMods().collect {(mod, newFileName) ->
+            modsman.getOutdatedMods().collect { (mod, newFileName) ->
                 println("${mod.projectId}: '${mod.projectName}' can be updated to '$newFileName'")
             }
         }
@@ -191,13 +201,15 @@ fun main(args: Array<String>) {
     try {
         jc.parse(*args)
     } catch (e: ParameterException) {
-        if (RootCommand.help) {
-            jc.parsedCommand?.let { jc.usage(it) } ?: jc.usage()
-            exitProcess(0)
-        } else {
+        if (!RootCommand.help) {
             JCommander.getConsole().println(e.message)
             exitProcess(1)
         }
+    }
+
+    if (RootCommand.help) {
+        jc.parsedCommand?.let {jc.usage(it)} ?: jc.usage()
+        exitProcess(0)
     }
 
     val command = jc.commands[jc.parsedCommand]?.objects?.get(0) as CommandBase? ?: RootCommand

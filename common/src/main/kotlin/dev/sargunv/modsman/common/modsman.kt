@@ -54,9 +54,9 @@ class Modsman(
         return Files.newInputStream(jarPath).use { it.readAllBytes() }
     }
 
-    private suspend fun fingerprint(jarName: String): Long {
+    private suspend fun fingerprint(jarPath: Path): Long {
         val whitespace = setOf<Byte>(9, 10, 13, 32)
-        val data = io { readToBytes(modlist.modsPath.resolve(jarName)) }
+        val data = io { readToBytes(jarPath) }
             .filter { it !in whitespace }.toByteArray()
         return Murmur2.hash(data, data.size, 1)
     }
@@ -144,9 +144,9 @@ class Modsman(
     }
 
     @FlowPreview
-    suspend fun matchMods(jars: List<String>): Flow<ModEntry> {
-        val fingerprintToFileName = jars.map { fileName -> fingerprint(fileName) to fileName }.toMap()
-        val matchResult = io { curseforgeClient.fingerprintAsync(fingerprintToFileName.keys.toList()).await() }
+    suspend fun matchMods(jars: List<Path>): Flow<ModEntry> {
+        val fingerprintToJarPath = jars.map { jarPath -> fingerprint(jarPath) to jarPath.toAbsolutePath() }.toMap()
+        val matchResult = io { curseforgeClient.fingerprintAsync(fingerprintToJarPath.keys.toList()).await() }
         val projectIdToFile = matchResult.exactMatches
             .map { result -> result.projectId to result.file }
             .toMap()
@@ -155,12 +155,12 @@ class Modsman(
             .toMap()
         return projectIdToAddon.entries.toFlow { (projectId, addon) ->
             val file = projectIdToFile.getValue(projectId)
-            val fileName = fingerprintToFileName.getValue(file.packageFingerprint)
+            val jarPath = fingerprintToJarPath.getValue(file.packageFingerprint)
             val mod = ModEntry(
                 projectId = projectId,
                 projectName = addon.name,
                 fileId = file.fileId,
-                fileName = modlist.modsPath.relativize(Path.of(fileName).toAbsolutePath()).toString()
+                fileName = modlist.modsPath.toAbsolutePath().relativize(jarPath).toString()
             )
             modlist.addOrUpdate(mod)
             mod
