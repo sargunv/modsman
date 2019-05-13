@@ -1,5 +1,5 @@
 rootProject.name = "modsman"
 
-include("common")
-include("cli")
-include("app")
+include("modsman-core")
+include("modsman-cli")
+include("modsman-gui")
