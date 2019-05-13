@@ -1,6 +1,9 @@
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
 plugins {
-    kotlin("jvm") version "1.3.31"
+    kotlin("jvm")
     application
+    id("org.openjfx.javafxplugin").version("0.0.7")
 }
 
 dependencies {
@@ -9,4 +12,13 @@ dependencies {
 
 application {
     mainClassName = "dev.sargunv.modsman.app.MainKt"
+}
+
+javafx {
+    version = "12.0.1"
+    modules = listOf("javafx.controls", "javafx.fxml")
+}
+
+tasks.withType<KotlinCompile> {
+    kotlinOptions.jvmTarget = "1.8"
 }

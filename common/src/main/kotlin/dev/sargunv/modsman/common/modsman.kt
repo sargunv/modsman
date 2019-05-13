@@ -17,7 +17,7 @@ import java.util.concurrent.Executors
 
 class Modsman(
     modsPath: Path,
-    numConcurrent: Int
+    val numConcurrent: Int
 ) : Closeable {
 
     val modlist = ModlistManager.load(modsPath)
@@ -155,11 +155,12 @@ class Modsman(
             .toMap()
         return projectIdToAddon.entries.toFlow { (projectId, addon) ->
             val file = projectIdToFile.getValue(projectId)
+            val fileName = fingerprintToFileName.getValue(file.packageFingerprint)
             val mod = ModEntry(
                 projectId = projectId,
                 projectName = addon.name,
                 fileId = file.fileId,
-                fileName = fingerprintToFileName.getValue(file.packageFingerprint)
+                fileName = modlist.modsPath.relativize(Path.of(fileName).toAbsolutePath()).toString()
             )
             modlist.addOrUpdate(mod)
             mod

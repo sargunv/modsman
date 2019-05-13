@@ -62,7 +62,7 @@ internal data class CurseforgeFileRequest(
 
 internal data class CurseforgeFingerprintResults(
     val exactMatches: List<Result>,
-    val exactFingerprints: List<Int>
+    val exactFingerprints: List<Long>
 ) {
     data class Result(
         @SerializedName("id")
