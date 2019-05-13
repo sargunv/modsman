@@ -31,6 +31,16 @@ jlink {
     launcher {
         name = "modsman"
     }
+
+    jpackage {
+        val os = System.getProperty("os.name").toLowerCase()
+        installerType = when {
+            os.contains("windows") -> "msi"
+            os.contains("mac") -> "dmg"
+            os.contains("linux") -> "deb"
+            else -> throw RuntimeException("Unsupported os: $os")
+        }
+    }
 }
 
 application {

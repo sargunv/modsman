@@ -26,13 +26,23 @@ val jar = tasks.getByName<Jar>("jar") {
 }
 
 jlink {
-    launcher{
-        name = "Modsman"
+    launcher {
+        name = "modsman-gui"
+    }
+
+    jpackage {
+        val os = System.getProperty("os.name").toLowerCase()
+        installerType = when {
+            os.contains("windows") -> "msi"
+            os.contains("mac") -> "dmg"
+            os.contains("linux") -> "deb"
+            else -> throw RuntimeException("Unsupported os: $os")
+        }
     }
 }
 
 application {
-    mainClassName = "dev.sargunv.modsman.app.MainKt"
+    mainClassName = "dev.sargunv.modsman.gui.MainKt"
 }
 
 //val jar = tasks.getByName<Jar>("jar") {

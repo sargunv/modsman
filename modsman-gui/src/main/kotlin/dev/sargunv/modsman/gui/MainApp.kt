@@ -49,7 +49,7 @@ class MainApp : Application() {
 
         val fxmlLoader = FXMLLoader(
             javaClass.getResource("Main.fxml"),
-            ResourceBundle.getBundle("dev/sargunv/modsman/app/bundle")
+            ResourceBundle.getBundle("dev/sargunv/modsman/gui/bundle")
         )
 
         val scene = Scene(fxmlLoader.load())
