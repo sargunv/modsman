@@ -2,6 +2,6 @@ package modsman.gui
 
 import javafx.application.Application
 
-fun main() {
-    Application.launch(MainApp::class.java)
+fun main(args: Array<String>) {
+    Application.launch(MainApp::class.java, *args)
 }

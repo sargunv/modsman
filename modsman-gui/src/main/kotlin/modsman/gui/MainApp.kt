@@ -16,7 +16,6 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.system.exitProcess
 
-
 class MainApp : Application() {
     private val title = "modsman ${BuildConfig.VERSION}"
 
