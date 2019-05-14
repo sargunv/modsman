@@ -9,5 +9,6 @@ module modsman.core {
     requires okhttp3;
     requires murmur;
 
-    exports dev.sargunv.modsman;
+    opens modsman;
+    exports modsman;
 }

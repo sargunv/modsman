@@ -1,4 +1,4 @@
-package dev.sargunv.modsman
+package modsman
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.Flow

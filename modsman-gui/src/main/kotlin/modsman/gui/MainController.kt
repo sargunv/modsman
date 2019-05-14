@@ -1,7 +1,7 @@
-package dev.sargunv.modsman.gui
+package modsman.gui
 
-import dev.sargunv.modsman.ModEntry
-import dev.sargunv.modsman.Modsman
+import modsman.ModEntry
+import modsman.Modsman
 import javafx.application.Platform
 import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.fxml.FXML

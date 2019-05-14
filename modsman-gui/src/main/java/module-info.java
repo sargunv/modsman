@@ -5,6 +5,8 @@ module modsman.gui {
     requires kotlinx.coroutines.core;
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
 
-    exports dev.sargunv.modsman.gui;
+    opens modsman.gui;
+    exports modsman.gui;
 }

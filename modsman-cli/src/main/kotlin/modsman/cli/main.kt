@@ -1,12 +1,12 @@
-package dev.sargunv.modsman.cli
+package modsman.cli
 
 import com.beust.jcommander.JCommander
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 import com.beust.jcommander.Parameters
-import dev.sargunv.modsman.BuildConfig
-import dev.sargunv.modsman.ModlistManager
-import dev.sargunv.modsman.Modsman
+import modsman.BuildConfig
+import modsman.ModlistManager
+import modsman.Modsman
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking

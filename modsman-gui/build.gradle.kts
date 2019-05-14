@@ -42,50 +42,5 @@ jlink {
 }
 
 application {
-    mainClassName = "dev.sargunv.modsman.gui.MainKt"
+    mainClassName = "modsman.gui.MainKt"
 }
-
-//val jar = tasks.getByName<Jar>("jar") {
-//    manifest {
-//        attributes(
-//            "Main-Class" to application.mainClassName,
-//            "Class-Path" to configurations.runtime.get().joinToString(" ") { it.name }
-//        )
-//    }
-//}
-//
-//val libsDir = "${property("libsDir")}"
-//
-//val build by tasks.named("build")
-//
-//val copyDependencies by tasks.registering(Copy::class) {
-//    dependsOn("build")
-//    destinationDir = File(libsDir)
-//    from(configurations.runtime.get())
-//}
-//
-//val jpackager by tasks.registering(Exec::class) {
-//    dependsOn("copyDependencies")
-//    val os = System.getProperty("os.name").toLowerCase()
-//    val nativeType = when {
-//        os.contains("windows") -> "msi"
-//        os.contains("mac") -> "dmg"
-//        os.contains("linux") -> "deb"
-//        else -> throw RuntimeException("Unsupported os: $os")
-//    }
-//    val dependencies = configurations.runtime.get().flatMap { listOf("-srcfiles", it.name) }
-//    workingDir = projectDir
-//    commandLine = listOf(
-//        "jpackager",
-//        "-deploy",
-//        "-nosign",
-//        "-native", nativeType,
-//        "-outdir", "$buildDir/distribution",
-//        "-outfile", project.name,
-//        "-name", "Modsman",
-//        "-appclass", application.mainClassName,
-//        "-srcdir", libsDir,
-//        "-srcmodulfiles", jar.archiveFileName,
-//        "-Bruntime="
-//    ) + dependencies
-//}

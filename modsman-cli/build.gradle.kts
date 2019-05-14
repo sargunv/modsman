@@ -44,5 +44,5 @@ jlink {
 }
 
 application {
-    mainClassName = "dev.sargunv.modsman.cli.MainKt"
+    mainClassName = "modsman.cli.MainKt"
 }

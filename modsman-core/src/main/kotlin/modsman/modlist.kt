@@ -1,4 +1,4 @@
-package dev.sargunv.modsman
+package modsman
 
 import com.google.gson.FieldNamingPolicy
 import com.google.gson.GsonBuilder

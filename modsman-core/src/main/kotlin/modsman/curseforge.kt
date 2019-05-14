@@ -1,4 +1,4 @@
-package dev.sargunv.modsman
+package modsman
 
 import com.google.gson.annotations.SerializedName
 import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory

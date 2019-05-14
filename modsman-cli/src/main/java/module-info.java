@@ -5,5 +5,6 @@ module modsman.cli {
     requires kotlinx.coroutines.core;
     requires jcommander;
 
-    exports dev.sargunv.modsman.cli;
+    opens modsman.cli;
+    exports modsman.cli;
 }

@@ -18,7 +18,7 @@ allprojects {
 }
 
 subprojects {
-    group = "dev.sargunv.modsman"
+    group = "modsman"
     version = gitVersion()
 }
 

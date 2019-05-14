@@ -1,9 +1,5 @@
-package dev.sargunv.modsman.gui
+package modsman.gui
 
-import dev.sargunv.modsman.BuildConfig
-import dev.sargunv.modsman.Modlist
-import dev.sargunv.modsman.ModlistManager
-import dev.sargunv.modsman.Modsman
 import javafx.application.Application
 import javafx.fxml.FXMLLoader
 import javafx.scene.Scene
@@ -11,6 +7,10 @@ import javafx.scene.control.TextInputDialog
 import javafx.scene.image.Image
 import javafx.stage.DirectoryChooser
 import javafx.stage.Stage
+import modsman.BuildConfig
+import modsman.Modlist
+import modsman.ModlistManager
+import modsman.Modsman
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -34,8 +34,7 @@ class MainApp : Application() {
     }
 
     private fun createModsman(stage: Stage): Modsman {
-        val params = parameters.raw
-        val path = if (params.size >= 1) Path.of(params[0]) else chooseDirectory(stage)
+        val path = chooseDirectory(stage)
         if (!Files.exists(path.resolve(Modlist.fileName))) {
             ModlistManager.init(path, chooseGameVersion()).close()
         }
@@ -49,7 +48,7 @@ class MainApp : Application() {
 
         val fxmlLoader = FXMLLoader(
             javaClass.getResource("Main.fxml"),
-            ResourceBundle.getBundle("dev/sargunv/modsman/gui/bundle")
+            ResourceBundle.getBundle("modsman.gui.strings")
         )
 
         val scene = Scene(fxmlLoader.load())

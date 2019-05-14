@@ -1,4 +1,4 @@
-package dev.sargunv.modsman
+package modsman
 
 import com.sangupta.murmur.Murmur2
 import kotlinx.coroutines.Dispatchers
@@ -169,5 +169,6 @@ class Modsman(
 
     override fun close() {
         modlist.close()
+//        downloadPool.shutdown()
     }
 }
