@@ -38,6 +38,7 @@ jlink {
             os.contains("linux") -> "deb"
             else -> throw RuntimeException("Unsupported os: $os")
         }
+        installerOptions = listOf("--win-console", "--win-menu", "--win-shortcut")
     }
 }
 
