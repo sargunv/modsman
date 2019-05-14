@@ -1,5 +1,5 @@
-import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import com.palantir.gradle.gitversion.VersionDetails
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
@@ -46,24 +46,31 @@ jlink {
                 osName.contains("linux") -> Os.LINUX
                 else -> throw RuntimeException("Unsupported os: $osName")
             }
+        }
 
-        installerType = when(os) {
+        installerType = when (os) {
             Os.WINDOWS -> "msi"
             Os.MACOS -> "dmg"
             Os.LINUX -> "deb"
         }
 
-        val icon = projectDir.toPath()
-            .resolve("icons/windows.ico")
-            .toAbsolutePath()
+        val icon = when (os) {
+            Os.WINDOWS -> "icons/windows.ico"
+            Os.MACOS -> "icons/macos.png"
+            Os.LINUX -> "icons/linux.png"
+        }.let { iconPath ->
+            projectDir.toPath()
+                .resolve(iconPath)
+                .toAbsolutePath()
+        }
 
         val appVersion = versionDetails().lastTag
 
-        val extraInstallerOptions = when(os) {
+        val extraInstallerOptions = when (os) {
             Os.WINDOWS -> listOf(
                 "--win-menu",
                 "--win-shortcut",
-                "--win-upgrade-uuid",  "5dec2353-b238-4172-b00f-43c98b40bf08"
+                "--win-upgrade-uuid", "5dec2353-b238-4172-b00f-43c98b40bf08"
             )
             Os.MACOS -> emptyList()
             Os.LINUX -> listOf("--linux-bundle-name", "modsman-gui")

@@ -3,7 +3,6 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     kotlin("jvm")
     application
-    id("org.beryx.jlink")
 }
 
 dependencies {
@@ -25,22 +24,6 @@ val compileKotlin = tasks.getByName<KotlinCompile>("compileKotlin") {
 
 val jar = tasks.getByName<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-jlink {
-    launcher {
-        name = "modsman"
-    }
-
-    jpackage {
-        val os = System.getProperty("os.name").toLowerCase()
-        installerType = when {
-            os.contains("windows") -> "msi"
-            os.contains("mac") -> "dmg"
-            os.contains("linux") -> "deb"
-            else -> throw RuntimeException("Unsupported os: $os")
-        }
-    }
 }
 
 application {
