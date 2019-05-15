@@ -1,4 +1,5 @@
-module modsman.core {
+open module modsman.core {
+    requires jdk.unsupported;
     requires kotlin.stdlib;
     requires kotlin.stdlib.jdk8;
     requires kotlinx.coroutines.core;
@@ -9,6 +10,5 @@ module modsman.core {
     requires okhttp3;
     requires murmur;
 
-    opens modsman;
     exports modsman;
 }

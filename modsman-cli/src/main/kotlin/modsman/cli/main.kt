@@ -69,7 +69,7 @@ internal object RootCommand : CommandBase() {
 
 @Parameters(commandNames = ["init"], commandDescription = "initialize a new mod list")
 internal object InitCommand : CommandBase() {
-    @Parameter(required = true, description = "GAME_VERSION")
+    @Parameter(names = ["--mc-version", "-M"], required = true, description = "the MC version this mods folder is for")
     lateinit var gameVersion: String
 
     override suspend fun run(jc: JCommander): Int {
