@@ -56,7 +56,7 @@ jlink {
 
         val icon = when (os) {
             Os.WINDOWS -> "icons/windows.ico"
-            Os.MACOS -> "icons/macos.png"
+            Os.MACOS -> "icons/macos.icns"
             Os.LINUX -> "icons/linux.png"
         }.let { iconPath ->
             projectDir.toPath()
