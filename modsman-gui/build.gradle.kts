@@ -54,6 +54,9 @@ jlink {
             Os.LINUX -> "deb"
         }
 
+        if (os == Os.MACOS)
+            skipInstaller = true
+
         val icon = when (os) {
             Os.WINDOWS -> "icons/windows.ico"
             Os.MACOS -> "icons/macos.icns"
