@@ -6,8 +6,8 @@ plugins {
 }
 
 dependencies {
-    compile(project(":modsman-core"))
-    compile(group = "com.beust", name = "jcommander", version = "1.71")
+    api(project(":modsman-core"))
+    api(group = "com.beust", name = "jcommander", version = "1.71")
 }
 
 val compileJava = tasks.getByName<JavaCompile>("compileJava") {
