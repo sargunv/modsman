@@ -49,20 +49,19 @@ val jar = tasks.getByName<Jar>("jar") {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
-if (versionDetails().isCleanTag) {
-    publishing {
-        publications {
-            register("mavenJava", MavenPublication::class) {
-                artifact(jar) {
-                    builtBy(jar)
-                }
-                artifact(sourcesJar.get()) {
-                    builtBy(sourcesJar)
-                }
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+            artifact(sourcesJar.get()) {
+                builtBy(sourcesJar)
             }
         }
+    }
 
-        repositories {
+    repositories {
+        mavenLocal()
+        if (versionDetails().isCleanTag) {
             if (project.hasProperty("publish_maven_s3_url")) {
                 maven {
                     setUrl(project.property("publish_maven_s3_url")!!)
