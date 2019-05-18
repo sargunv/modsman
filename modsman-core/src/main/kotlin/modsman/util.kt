@@ -12,15 +12,18 @@ internal inline fun <A, B> Collection<A>.toFlow(crossinline transform: suspend (
 }
 
 @FlowPreview
-internal inline fun <A, B> Collection<A>.parallelMapNotNullToFlow(
+internal inline fun <A, B> Collection<A>.parallelMapToResultFlow(
     executor: ExecutorService,
-    crossinline transform: suspend (A) -> B?
-): Flow<B> {
+    crossinline transform: suspend (A) -> B
+): Flow<Result<B>> {
     return flowViaChannel { channel ->
         val jobs = map { a ->
             launch(executor.asCoroutineDispatcher()) {
-                val b = transform(a) ?: return@launch
-                channel.send(b)
+                try {
+                    channel.send(Result.success(transform(a)))
+                } catch (e: Throwable) {
+                    channel.send(Result.failure(e))
+                }
             }
         }
         runBlocking { jobs.joinAll() }

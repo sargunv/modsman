@@ -45,8 +45,8 @@ class ModlistManager(val modsPath: Path, modlist: Modlist) : Closeable {
 
     operator fun get(projectId: Int) = modMap[projectId]
 
-    fun remove(projectId: Int): ModEntry? {
-        return modMap.remove(projectId)
+    fun remove(projectId: Int): ModEntry {
+        return modMap.remove(projectId) ?: throw ProjectNotFoundException(projectId)
     }
 
     fun updateInstalled(projectId: Int, fileId: Int, fileName: String): ModEntry {
@@ -58,7 +58,7 @@ class ModlistManager(val modsPath: Path, modlist: Modlist) : Closeable {
         return mod
     }
 
-    override fun close() {
+    fun save() {
         Files.newBufferedWriter(modsPath.resolve(Modlist.fileName)).use { writer ->
             Modlist.gson.toJson(
                 Modlist(config = config, mods = modMap.values.toList()),
@@ -66,6 +66,8 @@ class ModlistManager(val modsPath: Path, modlist: Modlist) : Closeable {
             )
         }
     }
+
+    override fun close() = save()
 
     companion object {
         fun init(modsPath: Path, gameVersion: String): ModlistManager {

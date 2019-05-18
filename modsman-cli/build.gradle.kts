@@ -27,5 +27,5 @@ val jar = tasks.getByName<Jar>("jar") {
 }
 
 application {
-    mainClassName = "modsman.cli/modsman.cli.MainKt"
+    mainClassName = "modsman.cli.MainKt"
 }

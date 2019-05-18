@@ -8,6 +8,7 @@ import modsman.BuildConfig
 import modsman.ModlistManager
 import modsman.Modsman
 import kotlinx.coroutines.FlowPreview
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import java.nio.file.NoSuchFileException
@@ -83,7 +84,7 @@ internal object AddCommand : ProjectsCommand() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.addMods(projectIds).collect {
+            modsman.addMods(projectIds).collectPrintingFailures {
                 println("Downloaded '${it.projectName}' to '${it.fileName}'")
             }
         }
@@ -96,7 +97,7 @@ internal object RemoveCommand : ProjectsCommand() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.removeMods(projectIds).collect {
+            modsman.removeMods(projectIds).collectPrintingFailures {
                 println("Deleted '${it.fileName}'")
             }
         }
@@ -109,7 +110,7 @@ internal object UpgradeCommand : ProjectsCommand() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.upgradeMods(projectIds).collect { (_, new) ->
+            modsman.upgradeMods(projectIds).collectPrintingFailures { (_, new) ->
                 println("Upgraded '${new.projectName}' to '${new.fileName}'")
             }
         }
@@ -122,7 +123,7 @@ internal object ReinstallCommand : ProjectsCommand() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.reinstallMods(projectIds).collect {
+            modsman.reinstallMods(projectIds).collectPrintingFailures {
                 println("Downloaded '${it.projectName}' as '${it.fileName}'")
             }
         }
@@ -148,7 +149,7 @@ internal object DiscoverCommand : CommandBase() {
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
             val jarPaths = jarNames.map { Path.of(it) }
-            modsman.matchMods(jarPaths).collect {
+            modsman.matchMods(jarPaths).collectPrintingFailures {
                 println("Matched '${it.projectName}' to '${it.fileName}'")
             }
         }
@@ -172,11 +173,20 @@ internal object ListOutdatedCommand : CommandBase() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            modsman.getOutdatedMods().collect { (mod, newFileName) ->
+            modsman.getOutdatedMods().collectPrintingFailures { (mod, newFileName) ->
                 println("${mod.projectId}: '${mod.projectName}' can be updated to '$newFileName'")
             }
         }
         return 0
+    }
+}
+
+@FlowPreview
+suspend fun <T> Flow<Result<T>>.collectPrintingFailures(action: suspend (value: T) -> Unit) {
+    collect { result ->
+        result
+            .onSuccess { action(it) }
+            .onFailure { println("${it::class.java.simpleName}: ${it.message}") }
     }
 }
 

@@ -33,8 +33,11 @@ val compileJava = tasks.getByName<JavaCompile>("compileJava") {
 }
 
 val compileKotlin = tasks.getByName<KotlinCompile>("compileKotlin") {
-    kotlinOptions.jvmTarget = "1.8"
     destinationDir = compileJava.destinationDir
+    kotlinOptions {
+        jvmTarget = "1.8"
+        freeCompilerArgs = listOf("-Xallow-result-return-type")
+    }
 }
 
 val sourcesJar by tasks.registering(Jar::class) {

@@ -1,22 +1,19 @@
 package modsman.gui
 
-import modsman.ModEntry
-import modsman.Modsman
 import javafx.application.Platform
 import javafx.beans.property.ReadOnlyObjectWrapper
 import javafx.fxml.FXML
 import javafx.fxml.Initializable
-import javafx.scene.control.Label
-import javafx.scene.control.SelectionMode
-import javafx.scene.control.TableColumn
-import javafx.scene.control.TableView
+import javafx.scene.control.*
 import javafx.scene.layout.BorderPane
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.count
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
+import modsman.ModEntry
+import modsman.Modsman
 import java.net.URL
 import java.nio.file.Files
 import java.util.*
@@ -103,22 +100,42 @@ class MainController : Initializable {
     }
 
     @FlowPreview
-    private fun <T> processProjects(getFlow: suspend Modsman.(List<Int>) -> Flow<T>, getStatus: (T) -> String, countVerb: String) {
+    private fun <T> processProjects(
+        getFlow: suspend Modsman.(List<Int>) -> Flow<Result<T>>,
+        getStatus: (T) -> String,
+        countVerb: String
+    ) {
         val projectIds = tableView.selectionModel.selectedItems.map { mod -> mod.projectId }
         processWithStatus({ getFlow(projectIds) }, getStatus, countVerb)
     }
 
     @FlowPreview
-    private fun <T> processWithStatus(getFlow: suspend Modsman.() -> Flow<T>, getStatus: (T) -> String, countVerb: String) {
+    private fun <T> processWithStatus(
+        getFlow: suspend Modsman.() -> Flow<Result<T>>,
+        getStatus: (T) -> String,
+        countVerb: String
+    ) {
         root.isDisable = true
         GlobalScope.launch {
-            modsman!!.use { modsman ->
-                val count = modsman.getFlow()
-                    .map { t ->
+            modsman!!.apply {
+                val count = getFlow()
+                    .filter { result ->
                         Platform.runLater {
-                            status.text = getStatus(t)
+                            result
+                                .onSuccess { t -> status.text = getStatus(t) }
+                                .onFailure { e ->
+                                    Alert(Alert.AlertType.ERROR, e.stackTrace.joinToString("\n")).apply {
+                                        headerText = "${e.javaClass.name}: ${e.message ?: ""}"
+                                        isResizable = true
+                                        width = 400.0
+                                        height = 300.0
+                                        show()
+                                    }
+                                }
                         }
+                        result.isSuccess
                     }.count()
+                save()
                 Platform.runLater {
                     status.text = "$countVerb $count mods"
                     refresh()

@@ -26,8 +26,11 @@ class MainApp : Application() {
     }
 
     private fun chooseGameVersion(): String {
-        val dialog = TextInputDialog("1.14.1")
-        dialog.headerText = "Mod list not found. Enter a game version to initialize a new mod list."
+        val dialog = TextInputDialog("1.14")
+        dialog.headerText = "Mod list not found. " +
+            "Enter a game version to initialize a new mod list. " +
+            "Modsman will match to any versions that contain this version as a substring. " +
+            "For example, the input \"1.14\" matches mods for \"1.14\", \"1.14.1\", and \"1.14-Snapshot\"."
         dialog.title = title
         return dialog.showAndWait().orElse(null) ?: exitProcess(0)
     }

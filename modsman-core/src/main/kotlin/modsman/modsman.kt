@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -26,8 +27,8 @@ class Modsman(
 
     private val ModEntry.filePath get() = modlist.modsPath.resolve(fileName)
 
-    private fun chooseBestFile(files: List<CurseforgeFile>): CurseforgeFile? {
-        return files
+    private fun chooseBestFile(files: List<CurseforgeFile>): CurseforgeFile {
+        val ret = files
             .filter { file ->
                 file.isAvailable &&
                     !file.isAlternate &&
@@ -36,6 +37,8 @@ class Modsman(
                     }
             }
             .maxBy { file -> file.fileDate }
+            ?.let { it }
+        return ret ?: throw ChooseFileException(modlist.config.gameVersion)
     }
 
     private fun deleteFile(mod: ModEntry): Boolean {
@@ -61,15 +64,19 @@ class Modsman(
         return Murmur2.hash(data, data.size, 1)
     }
 
-    private suspend fun getBestFile(projectId: Int): CurseforgeFile? {
+    private suspend fun getBestFile(projectId: Int): CurseforgeFile {
         val files = withContext(Dispatchers.IO) {
             curseforgeClient.getAddonFilesAsync(projectId).await()
         }
         return chooseBestFile(files)
     }
 
-    private suspend fun installMod(projectId: Int, projectName: String): ModEntry? {
-        val file = getBestFile(projectId) ?: return null
+    private suspend fun installMod(projectId: Int, projectName: String): ModEntry {
+        val file = try {
+            getBestFile(projectId)
+        } catch (e: ChooseFileException) {
+            throw InstallException(projectName, e)
+        }
         download(file.downloadUrl, file.fileNameOnDisk)
         val mod = ModEntry(
             projectId = projectId,
@@ -82,8 +89,11 @@ class Modsman(
     }
 
     private suspend fun upgradeMod(mod: ModEntry): ModEntry {
-        val file = getBestFile(mod.projectId) ?: throw RuntimeException(
-            "Failed to find a a version of '${mod.projectName}' matching '${modlist.config.gameVersion}'")
+        val file = try {
+            getBestFile(mod.projectId)
+        } catch (e: ChooseFileException) {
+            throw UpgradeException(mod, e)
+        }
 
         if (file.fileId == mod.fileId)
             return mod
@@ -97,54 +107,61 @@ class Modsman(
     }
 
     @FlowPreview
-    suspend fun addMods(projectIds: List<Int>): Flow<ModEntry> {
+    suspend fun addMods(projectIds: List<Int>): Flow<Result<ModEntry>> {
         return io {
             curseforgeClient.getAddonsAsync(projectIds).await()
-        }.parallelMapNotNullToFlow(downloadPool) {
+        }.parallelMapToResultFlow(downloadPool) {
             installMod(it.addonId, it.name)
         }
     }
 
     @FlowPreview
-    suspend fun removeMods(projectIds: List<Int>): Flow<ModEntry> {
+    suspend fun removeMods(projectIds: List<Int>): Flow<Result<ModEntry>> {
         return projectIds
             .mapNotNull(modlist::get)
-            .parallelMapNotNullToFlow(downloadPool) {
+            .parallelMapToResultFlow(downloadPool) {
                 io { deleteFile(it) }
                 modlist.remove(it.projectId)
             }
+            .filterNot { it.exceptionOrNull() is ProjectNotFoundException }
     }
 
     @FlowPreview
-    suspend fun upgradeMods(projectIds: List<Int>): Flow<Pair<ModEntry, ModEntry>> {
+    suspend fun upgradeMods(projectIds: List<Int>): Flow<Result<Pair<ModEntry, ModEntry>>> {
         return projectIds
             .mapNotNull(modlist::get)
-            .parallelMapNotNullToFlow(downloadPool) { mod -> mod to upgradeMod(mod) }
-            .filter { (old, new) -> old != new }
+            .parallelMapToResultFlow(downloadPool) { mod -> mod to upgradeMod(mod) }
+            .filter { it.map { (old, new) -> old != new }.getOrElse { true } }
     }
 
     @FlowPreview
-    suspend fun getOutdatedMods(): Flow<Pair<ModEntry, String>> {
+    suspend fun getOutdatedMods(): Flow<Result<Pair<ModEntry, String>>> {
         return modlist.mods
-            .parallelMapNotNullToFlow(downloadPool) { mod -> mod to getBestFile(mod.projectId) }
-            .filter { (mod, file) -> mod.fileId != (file?.fileId ?: mod.fileId)}
-            .map { (mod, file) -> mod to file!!.fileNameOnDisk}
+            .parallelMapToResultFlow(downloadPool) { mod ->
+                try {
+                    mod to getBestFile(mod.projectId)
+                } catch (e: ChooseFileException) {
+                    throw UpgradeException(mod, e)
+                }
+            }
+            .filter { it.map { (mod, file) -> mod.fileId != file.fileId }.getOrElse { true } }
+            .map { it.map { (mod, file) -> mod to file.fileNameOnDisk } }
     }
 
     @FlowPreview
-    suspend fun reinstallMods(projectIds: List<Int>): Flow<ModEntry> {
+    suspend fun reinstallMods(projectIds: List<Int>): Flow<Result<ModEntry>> {
         return projectIds
             .mapNotNull { id -> modlist[id]?.let { mod -> CurseforgeFileRequest(mod.projectId, mod.fileId) } }
             .let { requests -> io { curseforgeClient.getFilesAsync(requests).await() } }
             .mapNotNull { (idStr, files) -> if (files.isEmpty()) null else modlist[idStr.toInt()]!! to files[0] }
-            .parallelMapNotNullToFlow(downloadPool) { (mod, file) ->
+            .parallelMapToResultFlow(downloadPool) { (mod, file) ->
                 io { download(file.downloadUrl, mod.fileName) }
                 mod
             }
     }
 
     @FlowPreview
-    suspend fun matchMods(jars: List<Path>): Flow<ModEntry> {
+    suspend fun matchMods(jars: List<Path>): Flow<Result<ModEntry>> {
         val fingerprintToJarPath = jars.map { jarPath -> fingerprint(jarPath) to jarPath.toAbsolutePath() }.toMap()
         val matchResult = io { curseforgeClient.fingerprintAsync(fingerprintToJarPath.keys.toList()).await() }
         val projectIdToFile = matchResult.exactMatches
@@ -163,12 +180,14 @@ class Modsman(
                 fileName = modlist.modsPath.toAbsolutePath().relativize(jarPath).toString()
             )
             modlist.addOrUpdate(mod)
-            mod
+            Result.success(mod) // TODO properly Result-ify this
         }
     }
 
+    fun save() = modlist.save()
+
     override fun close() {
         modlist.close()
-//        downloadPool.shutdown()
+        downloadPool.shutdown()
     }
 }
