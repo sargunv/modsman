@@ -15,7 +15,7 @@ internal interface CurseforgeService {
     fun getAddonsAsync(@Body addonIds: List<Int>): Deferred<List<CurseforgeAddon>>
 
     @POST("addon/files")
-    fun getFilesAsync(@Body fileRequests: List<CurseforgeFileRequest>): Deferred<Map<String, List<CurseforgeFile>>>
+    fun getFilesAsync(@Body fileRequests: List<Int>): Deferred<Map<String, List<CurseforgeFile>>>
 
     @GET("addon/{id}/files")
     fun getAddonFilesAsync(@Path("id") addonId: Int): Deferred<List<CurseforgeFile>>
@@ -25,7 +25,7 @@ internal interface CurseforgeService {
 
     companion object {
         fun createClient(): CurseforgeService = Retrofit.Builder()
-            .baseUrl("https://addons-ecs.forgesvc.net/api/")
+            .baseUrl("https://addons-ecs.forgesvc.net/api/v2/")
             .addConverterFactory(
                 GsonConverterFactory.create())
             .addCallAdapterFactory(
@@ -44,8 +44,7 @@ internal data class CurseforgeAddon(
 internal data class CurseforgeFile(
     @SerializedName("id")
     val fileId: Int,
-    val name: Int,
-    val fileNameOnDisk: String,
+    val fileName: String,
     val downloadUrl: String,
     val fileDate: String,
     val releaseType: Int,
@@ -53,11 +52,6 @@ internal data class CurseforgeFile(
     val isAvailable: Boolean,
     val gameVersion: List<String>,
     val packageFingerprint: Long
-)
-
-internal data class CurseforgeFileRequest(
-    val addonId: Int,
-    val fileId: Int
 )
 
 internal data class CurseforgeFingerprintResults(

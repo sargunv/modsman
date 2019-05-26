@@ -77,12 +77,12 @@ class Modsman(
         } catch (e: ChooseFileException) {
             throw InstallException(projectName, e)
         }
-        download(file.downloadUrl, file.fileNameOnDisk)
+        download(file.downloadUrl, file.fileName)
         val mod = ModEntry(
             projectId = projectId,
             projectName = projectName,
             fileId = file.fileId,
-            fileName = file.fileNameOnDisk
+            fileName = file.fileName
         )
         modlist.addOrUpdate(mod)
         return mod
@@ -102,8 +102,8 @@ class Modsman(
             Files.deleteIfExists(mod.filePath)
         }
 
-        download(file.downloadUrl, file.fileNameOnDisk)
-        return modlist.updateInstalled(mod.projectId, file.fileId, file.fileNameOnDisk)
+        download(file.downloadUrl, file.fileName)
+        return modlist.updateInstalled(mod.projectId, file.fileId, file.fileName)
     }
 
     @FlowPreview
@@ -145,13 +145,13 @@ class Modsman(
                 }
             }
             .filter { it.map { (mod, file) -> mod.fileId != file.fileId }.getOrElse { true } }
-            .map { it.map { (mod, file) -> mod to file.fileNameOnDisk } }
+            .map { it.map { (mod, file) -> mod to file.fileName } }
     }
 
     @FlowPreview
     suspend fun reinstallMods(projectIds: List<Int>): Flow<Result<ModEntry>> {
         return projectIds
-            .mapNotNull { id -> modlist[id]?.let { mod -> CurseforgeFileRequest(mod.projectId, mod.fileId) } }
+            .mapNotNull { id -> modlist[id]?.fileId }
             .let { requests -> io { curseforgeClient.getFilesAsync(requests).await() } }
             .mapNotNull { (idStr, files) -> if (files.isEmpty()) null else modlist[idStr.toInt()]!! to files[0] }
             .parallelMapToResultFlow(downloadPool) { (mod, file) ->
