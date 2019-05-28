@@ -3,10 +3,7 @@ package modsman
 import com.sangupta.murmur.Murmur2
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.FlowPreview
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNot
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -162,25 +159,34 @@ class Modsman(
 
     @FlowPreview
     suspend fun matchMods(jars: List<Path>): Flow<Result<ModEntry>> {
-        val fingerprintToJarPath = jars.map { jarPath -> fingerprint(jarPath) to jarPath.toAbsolutePath() }.toMap()
-        val matchResult = io { curseforgeClient.fingerprintAsync(fingerprintToJarPath.keys.toList()).await() }
-        val projectIdToFile = matchResult.exactMatches
-            .map { result -> result.projectId to result.file }
-            .toMap()
-        val projectIdToAddon = io { curseforgeClient.getAddonsAsync(projectIdToFile.keys.toList()).await() }
-            .map { addon -> addon.addonId to addon }
-            .toMap()
-        return projectIdToAddon.entries.toFlow { (projectId, addon) ->
-            val file = projectIdToFile.getValue(projectId)
-            val jarPath = fingerprintToJarPath.getValue(file.packageFingerprint)
-            val mod = ModEntry(
-                projectId = projectId,
-                projectName = addon.name,
-                fileId = file.fileId,
-                fileName = modlist.modsPath.toAbsolutePath().relativize(jarPath).toString()
-            )
-            modlist.addOrUpdate(mod)
-            Result.success(mod) // TODO properly Result-ify this
+        try {
+            val fingerprintToJarPath = jars.map { jarPath -> fingerprint(jarPath) to jarPath.toAbsolutePath() }.toMap()
+            val matchResult = io { curseforgeClient.fingerprintAsync(fingerprintToJarPath.keys.toList()).await() }
+            if (matchResult.exactMatches.isEmpty()) {
+                return emptyFlow()
+            }
+
+            val projectIdToFile = matchResult.exactMatches
+                .map { result -> result.projectId to result.file }
+                .toMap()
+            val projectIdToAddon = io { curseforgeClient.getAddonsAsync(projectIdToFile.keys.toList()).await() }
+                .map { addon -> addon.addonId to addon }
+                .toMap()
+
+            return projectIdToAddon.entries.toFlow { (projectId, addon) ->
+                val file = projectIdToFile.getValue(projectId)
+                val jarPath = fingerprintToJarPath.getValue(file.packageFingerprint)
+                val mod = ModEntry(
+                    projectId = projectId,
+                    projectName = addon.name,
+                    fileId = file.fileId,
+                    fileName = modlist.modsPath.toAbsolutePath().relativize(jarPath).toString()
+                )
+                modlist.addOrUpdate(mod)
+                Result.success(mod)
+            }
+        } catch (e: Throwable) {
+            return flowOf(Result.failure(e))
         }
     }
 
