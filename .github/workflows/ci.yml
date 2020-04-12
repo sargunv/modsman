@@ -12,6 +12,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Build
-      run: ./gradlew build
+      run: ./gradlew build --info --stacktrace
     - name: Check
-      run: ./gradlew check
+      run: ./gradlew check --info --stacktrace
