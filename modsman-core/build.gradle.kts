@@ -1,14 +1,10 @@
-import com.palantir.gradle.gitversion.VersionDetails
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     kotlin("jvm")
     `maven-publish`
     id("de.fuerstenau.buildconfig") version "1.1.8"
-    id("com.palantir.git-version")
 }
-
-val versionDetails: groovy.lang.Closure<VersionDetails> by extra
 
 dependencies {
     api(kotlin("stdlib-jdk8", "1.3.31"))
@@ -61,16 +57,5 @@ publishing {
 
     repositories {
         mavenLocal()
-        if (versionDetails().isCleanTag) {
-            if (project.hasProperty("publish_maven_s3_url")) {
-                maven {
-                    setUrl(project.property("publish_maven_s3_url")!!)
-                    credentials(AwsCredentials::class) {
-                        accessKey = project.property("publish_maven_s3_access_key") as String
-                        secretKey = project.property("publish_maven_s3_secret_key") as String
-                    }
-                }
-            }
-        }
     }
 }

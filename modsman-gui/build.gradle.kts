@@ -1,15 +1,13 @@
-import com.palantir.gradle.gitversion.VersionDetails
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+
+val modsmanVersion: String by project
 
 plugins {
     kotlin("jvm")
     application
     id("org.openjfx.javafxplugin") version "0.0.7"
     id("org.beryx.jlink")
-    id("com.palantir.git-version")
 }
-
-val versionDetails: groovy.lang.Closure<VersionDetails> by extra
 
 dependencies {
     implementation(project(":modsman-core"))
@@ -67,7 +65,7 @@ jlink {
                 .toAbsolutePath()
         }
 
-        val appVersion = versionDetails().lastTag
+        val appVersion = modsmanVersion.substringBefore("-")
 
         val extraInstallerOptions = when (os) {
             Os.WINDOWS -> listOf(
