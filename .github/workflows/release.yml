@@ -22,7 +22,7 @@ jobs:
           java-version: '11'
       
       - name: Install
-        run: ./gradlew installDist --info --stacktrace
+        run: ./gradlew distZip --info --stacktrace
       
       - uses: WyriHaximus/github-action-get-previous-tag@0.1.0
         id: get_tag
