@@ -34,7 +34,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Modsman v${{ github.ref }}
-          draft: true
+          draft: false
           prerelease: true
       
       - uses: actions/upload-release-asset@v1
