@@ -11,12 +11,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-      with:
-        fetch-depth: '0'
+#       with:
+#         fetch-depth: '0'
     - name: Fetch unshallow
       run: |
-        git fetch --prune --tags
+        git fetch --prune --tags --unshallow
         echo $(git tag -l)
+        echo $(git describe --tags --always --first-parent)
     - uses: actions/setup-java@v1
       with:
         java-version: '11'
