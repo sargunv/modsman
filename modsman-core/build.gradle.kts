@@ -62,15 +62,7 @@ publishing {
     repositories {
         mavenLocal()
         if (versionDetails().isCleanTag) {
-            if (project.hasProperty("publish_maven_s3_url")) {
-                maven {
-                    setUrl(project.property("publish_maven_s3_url")!!)
-                    credentials(AwsCredentials::class) {
-                        accessKey = project.property("publish_maven_s3_access_key") as String
-                        secretKey = project.property("publish_maven_s3_secret_key") as String
-                    }
-                }
-            }
+            // TODO add prod maven repo here
         }
     }
 }

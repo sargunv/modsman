@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Fetch unshallow
+      run: |
+        git fetch --prune --tags --unshallow
+        echo $(git describe --tags --always --first-parent)
+    - uses: actions/setup-java@v1
+      with:
+        java-version: '11'
+    - name: Build
+      run: ./gradlew build --info --stacktrace
+    - name: Verify
+      run: ./gradlew check --info --stacktrace
