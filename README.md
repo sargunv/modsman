@@ -2,7 +2,7 @@
 
 A mod manager for Minecraft.
 
-GUI releases are built on Azure DevOps. [Click here for a list of recent builds.](https://buildartifactbrowser.azurewebsites.net/api/builds?org=sargunvohra&project=modsman&count=10)
+GUI releases are currently unavailable.
 
 CLI releases are available on [Brew for macOS and Linux](https://brew.sh/), or [Scoop for Windows](https://scoop.sh/).
 
