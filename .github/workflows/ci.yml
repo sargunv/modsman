@@ -14,7 +14,9 @@ jobs:
       with:
         fetch-depth: '0'
     - name: Fetch unshallow
-      run: git fetch --prune --tags --unshallow
+      run: |
+        git fetch --prune --tags
+        echo $(git tag -l)
     - uses: actions/setup-java@v1
       with:
         java-version: '11'
