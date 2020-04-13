@@ -11,6 +11,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+      fetch-depth: 0
+    - name: Fetch unshallow
+      run: git fetch --prune --tags --unshallow
     - name: Build
       run: ./gradlew build --info --stacktrace
     - name: Check
