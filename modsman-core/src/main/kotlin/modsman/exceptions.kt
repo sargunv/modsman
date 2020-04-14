@@ -5,8 +5,8 @@ sealed class ModsmanException : RuntimeException {
     constructor(message: String, cause: Throwable) : super(message, cause)
 }
 
-class ChooseFileException(version: String) :
-    ModsmanException("Failed to find a valid version matching '$version'")
+class ChooseFileException(versions: List<String>) :
+    ModsmanException("Failed to find a valid version matching $versions")
 
 class UpgradeException(mod: ModEntry, cause: ChooseFileException) :
     ModsmanException("Failed to upgrade '${mod.projectName}', caused by: ${cause.message}", cause)

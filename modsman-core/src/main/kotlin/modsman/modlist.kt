@@ -1,8 +1,8 @@
 package modsman
 
-import com.google.gson.FieldNamingPolicy
-import com.google.gson.GsonBuilder
+import com.google.gson.*
 import java.io.Closeable
+import java.lang.reflect.Type
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -18,7 +18,7 @@ data class Modlist(
     val mods: List<ModEntry>
 ) {
     data class Config(
-        val gameVersion: String
+        val requiredGameVersions: List<String>
     )
 
     companion object {
@@ -26,6 +26,23 @@ data class Modlist(
         const val fileName = ".modlist.json"
 
         internal val gson = GsonBuilder()
+            .registerTypeAdapter(
+                Config::class.java,
+                JsonDeserializer { element: JsonElement,
+                                   _: Type,
+                                   _: JsonDeserializationContext ->
+                    val obj = element.asJsonObject
+                    Config(
+                        when {
+                            obj.has("required_game_versions") ->
+                                obj.get("required_game_versions").asJsonArray.map { it.asString }
+                            obj.has("game_version") ->
+                                listOf(obj.get("game_version").asString)
+                            else -> emptyList()
+                        }
+                    )
+                }
+            )
             .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setPrettyPrinting()
             .create()!!
@@ -70,14 +87,14 @@ class ModlistManager(val modsPath: Path, modlist: Modlist) : Closeable {
     override fun close() = save()
 
     companion object {
-        fun init(modsPath: Path, gameVersion: String): ModlistManager {
+        fun init(modsPath: Path, gameVersions: List<String>): ModlistManager {
             modsPath.resolve(Modlist.fileName).let {
                 if (Files.exists(it))
                     throw FileAlreadyExistsException(it.toFile())
                 else
                     return ModlistManager(
                         modsPath = modsPath,
-                        modlist = Modlist(config = Modlist.Config(gameVersion), mods = arrayListOf())
+                        modlist = Modlist(config = Modlist.Config(gameVersions), mods = arrayListOf())
                     )
             }
         }

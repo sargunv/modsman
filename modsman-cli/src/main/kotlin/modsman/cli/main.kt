@@ -4,13 +4,13 @@ import com.beust.jcommander.JCommander
 import com.beust.jcommander.Parameter
 import com.beust.jcommander.ParameterException
 import com.beust.jcommander.Parameters
-import modsman.BuildConfig
-import modsman.ModlistManager
-import modsman.Modsman
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
+import modsman.BuildConfig
+import modsman.ModlistManager
+import modsman.Modsman
 import java.nio.file.NoSuchFileException
 import java.nio.file.Path
 import kotlin.system.exitProcess
@@ -70,11 +70,11 @@ internal object RootCommand : CommandBase() {
 
 @Parameters(commandNames = ["init"], commandDescription = "initialize a new mod list")
 internal object InitCommand : CommandBase() {
-    @Parameter(names = ["--mc-version", "-M"], required = true, description = "the MC version this mods folder is for")
-    lateinit var gameVersion: String
+    @Parameter(names = ["--mc-version", "-M"], required = true, description = "the target MC version (repeatable)")
+    lateinit var gameVersions: List<String>
 
     override suspend fun run(jc: JCommander): Int {
-        ModlistManager.init(Path.of(RootCommand.modsFolder), gameVersion).close()
+        ModlistManager.init(Path.of(RootCommand.modsFolder), gameVersions).close()
         return 0
     }
 }
@@ -218,7 +218,7 @@ fun main(args: Array<String>) {
     }
 
     if (RootCommand.help) {
-        jc.parsedCommand?.let {jc.usage(it)} ?: jc.usage()
+        jc.parsedCommand?.let { jc.usage(it) } ?: jc.usage()
         exitProcess(0)
     }
 

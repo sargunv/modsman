@@ -25,20 +25,23 @@ class MainApp : Application() {
         return chooser.showDialog(stage)?.toPath() ?: exitProcess(0)
     }
 
-    private fun chooseGameVersion(): String {
+    private fun chooseGameVersions(): List<String> {
         val dialog = TextInputDialog("1.14")
         dialog.headerText = "Mod list not found." +
             "\nEnter a game version to initialize a new mod list." +
             "\nModsman will match to any versions that contain this version as a substring." +
             "\nFor example, the input \"1.14\" matches mods for \"1.14\", \"1.14.1\", and \"1.14-Snapshot\"."
         dialog.title = title
-        return dialog.showAndWait().orElse(null) ?: exitProcess(0)
+        return dialog
+            .showAndWait()
+            .map { it.split("\\s+,\\s+") }
+            .orElseGet { exitProcess(0) }
     }
 
     private fun createModsman(stage: Stage): Modsman {
         val path = chooseDirectory(stage)
         if (!Files.exists(path.resolve(Modlist.fileName))) {
-            ModlistManager.init(path, chooseGameVersion()).close()
+            ModlistManager.init(path, chooseGameVersions()).close()
         }
         return Modsman(path, 10)
     }

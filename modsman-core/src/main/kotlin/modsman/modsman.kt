@@ -29,13 +29,14 @@ class Modsman(
             .filter { file ->
                 file.isAvailable &&
                     !file.isAlternate &&
-                    file.gameVersion.any { version ->
-                        modlist.config.gameVersion in version
+                    modlist.config.requiredGameVersions.all { configVersion ->
+                        file.gameVersion.any { fileVersion ->
+                            configVersion in fileVersion
+                        }
                     }
             }
             .maxBy { file -> file.fileDate }
-            ?.let { it }
-        return ret ?: throw ChooseFileException(modlist.config.gameVersion)
+        return ret ?: throw ChooseFileException(modlist.config.requiredGameVersions)
     }
 
     private fun deleteFile(mod: ModEntry): Boolean {

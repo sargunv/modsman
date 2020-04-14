@@ -159,7 +159,7 @@ class MainController : Initializable {
 
         modsman?.let {
             path.text = "${it.modlist.modsPath.toAbsolutePath()}"
-            version.text = "MC ${it.modlist.config.gameVersion}"
+            version.text = it.modlist.config.requiredGameVersions.joinToString(", ")
             tableView.items.addAll(it.modlist.mods)
         }
     }
