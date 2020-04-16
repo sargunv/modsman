@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
 import modsman.BuildConfig
+import modsman.ModlistConfig
 import modsman.ModlistManager
 import modsman.Modsman
 import java.nio.file.NoSuchFileException
@@ -70,11 +71,28 @@ internal object RootCommand : CommandBase() {
 
 @Parameters(commandNames = ["init"], commandDescription = "initialize a new mod list")
 internal object InitCommand : CommandBase() {
-    @Parameter(names = ["--mc-version", "-M"], required = true, description = "the target MC version (repeatable)")
-    lateinit var gameVersions: List<String>
+    @Parameter(
+        names = ["--require-version", "-R"],
+        required = true,
+        description = "required game version tag; specify multiple times for multiple versions"
+    )
+    lateinit var requiredGameVersions: List<String>
+
+    @Parameter(
+        names = ["--exclude-version", "-X"],
+        required = true,
+        description = "excluded game version tag; specify multiple times for multiple versions"
+    )
+    lateinit var excludedGameVersions: List<String>
 
     override suspend fun run(jc: JCommander): Int {
-        ModlistManager.init(Paths.get(RootCommand.modsFolder), gameVersions).close()
+        ModlistManager.init(
+            Paths.get(RootCommand.modsFolder),
+            ModlistConfig(
+                requiredGameVersions = requiredGameVersions,
+                excludedGameVersions = excludedGameVersions
+            )
+        ).close()
         return 0
     }
 }

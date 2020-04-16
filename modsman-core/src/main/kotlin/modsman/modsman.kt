@@ -15,7 +15,7 @@ import java.util.concurrent.Executors
 
 class Modsman(
     modsPath: Path,
-    val numConcurrent: Int
+    numConcurrent: Int
 ) : Closeable {
 
     val modlist = ModlistManager.load(modsPath)
@@ -30,6 +30,11 @@ class Modsman(
                 file.isAvailable &&
                     !file.isAlternate &&
                     modlist.config.requiredGameVersions.all { configVersion ->
+                        file.gameVersion.any { fileVersion ->
+                            configVersion in fileVersion
+                        }
+                    } &&
+                    modlist.config.excludedGameVersions.none { configVersion ->
                         file.gameVersion.any { fileVersion ->
                             configVersion in fileVersion
                         }
@@ -52,7 +57,7 @@ class Modsman(
     }
 
     private fun readToBytes(jarPath: Path): ByteArray {
-        return Files.newInputStream(jarPath).use { it.readAllBytes() }
+        return Files.readAllBytes(jarPath)
     }
 
     private suspend fun fingerprint(jarPath: Path): Long {
@@ -190,8 +195,6 @@ class Modsman(
             return flowOf(Result.failure(e))
         }
     }
-
-    fun save() = modlist.save()
 
     override fun close() {
         modlist.close()
