@@ -12,7 +12,7 @@ import modsman.BuildConfig
 import modsman.ModlistManager
 import modsman.Modsman
 import java.nio.file.NoSuchFileException
-import java.nio.file.Path
+import java.nio.file.Paths
 import kotlin.system.exitProcess
 
 internal sealed class CommandBase {
@@ -59,7 +59,7 @@ internal object RootCommand : CommandBase() {
 
     fun createModsman(): Modsman {
         try {
-            return Modsman(Path.of(modsFolder), maxConcurrent)
+            return Modsman(Paths.get(modsFolder), maxConcurrent)
         } catch (e: NoSuchFileException) {
             JCommander.getConsole().println("Couldn't find file: ${e.message}")
             JCommander.getConsole().println("Did you forget to run `modsman init`?")
@@ -74,7 +74,7 @@ internal object InitCommand : CommandBase() {
     lateinit var gameVersions: List<String>
 
     override suspend fun run(jc: JCommander): Int {
-        ModlistManager.init(Path.of(RootCommand.modsFolder), gameVersions).close()
+        ModlistManager.init(Paths.get(RootCommand.modsFolder), gameVersions).close()
         return 0
     }
 }
@@ -148,7 +148,7 @@ internal object DiscoverCommand : CommandBase() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().use { modsman ->
-            val jarPaths = jarNames.map { Path.of(it) }
+            val jarPaths = jarNames.map { Paths.get(it) }
             modsman.matchMods(jarPaths).collectPrintingFailures {
                 println("Matched '${it.projectName}' to '${it.fileName}'")
             }
