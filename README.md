@@ -2,8 +2,6 @@
 
 A mod manager for Minecraft.
 
-GUI releases are currently unavailable.
-
 CLI releases are available on [Brew for macOS and Linux](https://brew.sh/), or [Scoop for Windows](https://scoop.sh/).
 
 ```bash
