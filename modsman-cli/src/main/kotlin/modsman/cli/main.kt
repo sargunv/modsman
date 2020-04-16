@@ -73,17 +73,15 @@ internal object RootCommand : CommandBase() {
 internal object InitCommand : CommandBase() {
     @Parameter(
         names = ["--require-version", "-R"],
-        required = true,
         description = "required game version tag; specify multiple times for multiple versions"
     )
-    lateinit var requiredGameVersions: List<String>
+    var requiredGameVersions: List<String> = emptyList()
 
     @Parameter(
         names = ["--exclude-version", "-X"],
-        required = true,
         description = "excluded game version tag; specify multiple times for multiple versions"
     )
-    lateinit var excludedGameVersions: List<String>
+    var excludedGameVersions: List<String> = emptyList()
 
     override suspend fun run(jc: JCommander): Int {
         ModlistManager.init(

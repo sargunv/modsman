@@ -1,0 +1,9 @@
+{
+  "config": {
+    "required_game_versions": [
+      "1.15"
+    ],
+    "excluded_game_versions": []
+  },
+  "mods": []
+}
