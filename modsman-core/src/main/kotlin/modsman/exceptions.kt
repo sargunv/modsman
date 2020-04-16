@@ -5,8 +5,14 @@ sealed class ModsmanException : RuntimeException {
     constructor(message: String, cause: Throwable) : super(message, cause)
 }
 
-class ChooseFileException(versions: List<String>) :
-    ModsmanException("Failed to find a valid version matching $versions")
+class PinnedException(mod: ModEntry) :
+    ModsmanException("Won't upgrade pinned mod '${mod.projectName}'")
+
+class ChooseFileException(config: ModlistConfig) :
+    ModsmanException(
+        "Failed to find a valid version matching ${config.requiredGameVersions} "
+            + "and excluding ${config.excludedGameVersions}"
+    )
 
 class UpgradeException(mod: ModEntry, cause: ChooseFileException) :
     ModsmanException("Failed to upgrade '${mod.projectName}', caused by: ${cause.message}", cause)

@@ -41,7 +41,7 @@ class Modsman(
                     }
             }
             .maxBy { file -> file.fileDate }
-        return ret ?: throw ChooseFileException(modlist.config.requiredGameVersions)
+        return ret ?: throw ChooseFileException(modlist.config)
     }
 
     private fun deleteFile(mod: ModEntry): Boolean {
@@ -63,7 +63,7 @@ class Modsman(
     private suspend fun fingerprint(jarPath: Path): Long {
         val whitespace = setOf<Byte>(9, 10, 13, 32)
         val data = io { readToBytes(jarPath) }
-            .filter { it !in whitespace }.toByteArray()
+            .filter { byte -> byte !in whitespace }.toByteArray()
         return Murmur2.hash(data, data.size, 1)
     }
 
@@ -113,42 +113,58 @@ class Modsman(
     suspend fun addMods(projectIds: List<Int>): Flow<Result<ModEntry>> {
         return io {
             curseforgeClient.getAddonsAsync(projectIds).await()
-        }.parallelMapToResultFlow(downloadPool) {
-            installMod(it.addonId, it.name)
+        }.parallelMapToResultFlow(downloadPool) { cfAddon ->
+            installMod(cfAddon.addonId, cfAddon.name)
         }
+    }
+
+    @FlowPreview
+    fun setPinnedMods(projectIds: List<Int>, pinned: Boolean): Flow<Result<ModEntry>> {
+        return projectIds
+            .mapNotNull(modlist::get)
+            .toFlow { mod ->
+                modlist.addOrUpdate(mod.copy(pinned = pinned))
+                Result.success(mod)
+            }
     }
 
     @FlowPreview
     suspend fun removeMods(projectIds: List<Int>): Flow<Result<ModEntry>> {
         return projectIds
             .mapNotNull(modlist::get)
-            .parallelMapToResultFlow(downloadPool) {
-                io { deleteFile(it) }
-                modlist.remove(it.projectId)
+            .parallelMapToResultFlow(downloadPool) { mod ->
+                io { deleteFile(mod) }
+                modlist.remove(mod.projectId)
             }
-            .filterNot { it.exceptionOrNull() is ProjectNotFoundException }
+            .filterNot { result -> result.exceptionOrNull() is ProjectNotFoundException }
     }
 
     @FlowPreview
     suspend fun upgradeMods(projectIds: List<Int>): Flow<Result<Pair<ModEntry, ModEntry>>> {
         return projectIds
             .mapNotNull(modlist::get)
-            .parallelMapToResultFlow(downloadPool) { mod -> mod to upgradeMod(mod) }
-            .filter { it.map { (old, new) -> old != new }.getOrElse { true } }
+            .parallelMapToResultFlow(downloadPool) { mod ->
+                if (mod.pinned)
+                    throw PinnedException(mod)
+                mod to upgradeMod(mod)
+            }
+            .filter { result -> result.map { (old, new) -> old != new }.getOrElse { true } }
     }
 
     @FlowPreview
     suspend fun getOutdatedMods(): Flow<Result<Pair<ModEntry, String>>> {
         return modlist.mods
             .parallelMapToResultFlow(downloadPool) { mod ->
+                if (mod.pinned)
+                    throw PinnedException(mod)
                 try {
                     mod to getBestFile(mod.projectId)
                 } catch (e: ChooseFileException) {
                     throw UpgradeException(mod, e)
                 }
             }
-            .filter { it.map { (mod, file) -> mod.fileId != file.fileId }.getOrElse { true } }
-            .map { it.map { (mod, file) -> mod to file.fileName } }
+            .filter { result -> result.map { (mod, file) -> mod.fileId != file.fileId }.getOrElse { true } }
+            .map { result -> result.map { (mod, file) -> mod to file.fileName } }
     }
 
     @FlowPreview

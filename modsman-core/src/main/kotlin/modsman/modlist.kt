@@ -10,7 +10,8 @@ data class ModEntry(
     val projectId: Int,
     val projectName: String,
     val fileId: Int,
-    val fileName: String
+    val fileName: String,
+    val pinned: Boolean = false
 )
 
 data class ModlistConfig(

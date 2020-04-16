@@ -180,11 +180,40 @@ internal object ListCommand : CommandBase() {
     @FlowPreview
     override suspend fun run(jc: JCommander): Int {
         RootCommand.createModsman().modlist.mods.forEach {
-            println("${it.projectId}: '${it.projectName}' as '${it.fileName}'")
+            println("${it.projectId}: '${it.projectName}' ${if (it.pinned) "pinned to" else "as"} '${it.fileName}'")
         }
         return 0
     }
 }
+
+@Parameters(commandNames = ["pin"], commandDescription = "pin the mod to the current version; disallow upgrades")
+internal object PinCommand : ProjectsCommand() {
+    @FlowPreview
+    override suspend fun run(jc: JCommander): Int {
+        RootCommand.createModsman().use { modsman ->
+            modsman.setPinnedMods(projectIds, true).collectPrintingFailures { mod ->
+                println("Pinned '${mod.projectName}'")
+            }
+        }
+        return 0
+    }
+}
+
+@Parameters(commandNames = ["unpin"], commandDescription = "unpin the mod to the current version; allow upgrades")
+internal object UnpinCommand : ProjectsCommand() {
+    @FlowPreview
+    override suspend fun run(jc: JCommander): Int {
+        RootCommand.createModsman().use { modsman ->
+            modsman.setPinnedMods(projectIds, false).collectPrintingFailures { mod ->
+                println("Unpinned '${mod.projectName}'")
+            }
+        }
+        return 0
+    }
+}
+
+@Parameters(commandNames = ["unpin-all"], commandDescription = "unpin all mods in the mod list")
+internal object UnpinAllCommand : AllProjectsCommand(UnpinCommand)
 
 @Parameters(commandNames = ["list-outdated"], commandDescription = "list the mods that can be upgraded")
 internal object ListOutdatedCommand : CommandBase() {
@@ -217,9 +246,12 @@ fun main(args: Array<String>) {
         .addCommand(RemoveCommand)
         .addCommand(UpgradeCommand)
         .addCommand(ReinstallCommand)
+        .addCommand(PinCommand)
+        .addCommand(UnpinCommand)
         .addCommand(UpgradeAllCommand)
         .addCommand(RemoveAllCommand)
         .addCommand(ReinstallAllCommand)
+        .addCommand(UnpinAllCommand)
         .addCommand(DiscoverCommand)
         .addCommand(ListCommand)
         .addCommand(ListOutdatedCommand)
