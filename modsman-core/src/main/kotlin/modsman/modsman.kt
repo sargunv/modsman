@@ -8,10 +8,12 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.Closeable
+import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 class Modsman(
     modsPath: Path,
@@ -23,6 +25,12 @@ class Modsman(
     private val downloadPool = Executors.newFixedThreadPool(numConcurrent)
 
     private val ModEntry.filePath get() = modlist.modsPath.resolve(fileName)
+
+    private val okHttpClient = OkHttpClient.Builder()
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(30, TimeUnit.SECONDS)
+        .writeTimeout(30, TimeUnit.SECONDS)
+        .build()
 
     private fun chooseBestFile(files: List<CurseforgeFile>): CurseforgeFile {
         val ret = files
@@ -50,11 +58,15 @@ class Modsman(
     }
 
     private suspend fun download(url: String, fileName: String) = withContext(Dispatchers.IO) {
-        Files.copy(
-            OkHttpClient().newCall(Request.Builder().url(url).build()).execute().body()!!.byteStream(),
-            modlist.modsPath.resolve(fileName),
-            StandardCopyOption.REPLACE_EXISTING
-        )
+        try {
+            Files.copy(
+                okHttpClient.newCall(Request.Builder().url(url).build()).execute().body()!!.byteStream(),
+                modlist.modsPath.resolve(fileName),
+                StandardCopyOption.REPLACE_EXISTING
+            )
+        } catch (e: IOException) {
+            throw DownloadException(url, fileName, e)
+        }
     }
 
     private fun readToBytes(jarPath: Path): ByteArray {

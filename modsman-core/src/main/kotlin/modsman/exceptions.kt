@@ -5,6 +5,13 @@ sealed class ModsmanException : RuntimeException {
     constructor(message: String, cause: Throwable) : super(message, cause)
 }
 
+class DownloadException(url: String, fileName: String, cause: Throwable) :
+    ModsmanException(
+        "Failed to download '$fileName' from '$url'"
+            + ", caused by ${cause::class.java.simpleName}: ${cause.message}",
+        cause
+    )
+
 class PinnedException(mod: ModEntry) :
     ModsmanException("Won't upgrade pinned mod '${mod.projectName}'")
 
