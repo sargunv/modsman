@@ -50,6 +50,8 @@ Adding `-R 1.15` flag tells Modsman you want mods for MC 1.15.x, and `-X Forge` 
 }
 ```
 
+All of the following instructions assume your current working directory is your *.minecraft/mods* directory where you've already initialized Modsman.
+
 ### Add mods or discover already installed mods
 
 You probably already have some mods from CurseForge in your mods directory. You can have Modsman automatically match them up to their CurseForge listing and track them in its modlist:
@@ -86,17 +88,19 @@ modsman-cli upgrade 306612
 
 For the specific-mod example, pass the CurseForge project IDs. The mod version resolution is based on the config in the .modlist.json, which we set up with whitelisted/blacklisted MC versions in the first step.
 
-To check for updates:
-
-```bash
-modsman-cli list-outdated
-```
-
 Modsman supports pinning versions to exclude them from updating and update-checking.
 
 ```bash
 modsman-cli pin 306612
 modsman-cli unpin 306612
+```
+
+I reccommend just pinning the versions you want to freeze and running upgrade-all.
+
+To check for updates:
+
+```bash
+modsman-cli list-outdated
 ```
 
 ### Next steps
