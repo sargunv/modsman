@@ -1,6 +1,6 @@
 # Modsman
 
-A mod manager for Minecraft.
+A mod manager for Minecraft. It can download, manage, and update mods and resource packs from CurseForge, as well as [inflate MultiMC modpacks by downloading mods on first run](https://github.com/sargunv-mc-mods/modsman-modpack-example).
 
 CLI releases are available on [Brew for macOS and Linux](https://brew.sh/), or [Scoop for Windows](https://scoop.sh/).
 
