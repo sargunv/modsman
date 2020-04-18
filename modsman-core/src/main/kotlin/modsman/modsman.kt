@@ -183,7 +183,9 @@ class Modsman(
     @FlowPreview
     suspend fun matchMods(jars: List<Path>): Flow<Result<ModEntry>> {
         try {
-            val fingerprintToJarPath = jars.map { jarPath -> fingerprint(jarPath) to jarPath.toAbsolutePath() }.toMap()
+            val fingerprintToJarPath = jars.map { jarPath ->
+                fingerprint(jarPath) to jarPath.toAbsolutePath().normalize()
+            }.toMap()
             val matchResult = io { curseforgeClient.fingerprintAsync(fingerprintToJarPath.keys.toList()).await() }
             if (matchResult.exactMatches.isEmpty()) {
                 return emptyFlow()
@@ -196,6 +198,7 @@ class Modsman(
                 .map { addon -> addon.addonId to addon }
                 .toMap()
 
+            val modsPath = modlist.modsPath.toAbsolutePath().normalize()
             return projectIdToAddon.entries.toFlow { (projectId, addon) ->
                 val file = projectIdToFile.getValue(projectId)
                 val jarPath = fingerprintToJarPath.getValue(file.packageFingerprint)
@@ -203,7 +206,7 @@ class Modsman(
                     projectId = projectId,
                     projectName = addon.name,
                     fileId = file.fileId,
-                    fileName = modlist.modsPath.toAbsolutePath().relativize(jarPath).toString()
+                    fileName = modsPath.relativize(jarPath).toString()
                 )
                 modlist.addOrUpdate(mod)
                 Result.success(mod)
