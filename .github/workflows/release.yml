@@ -55,5 +55,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ./modsman-packutil/build/libs/modsman-packutil-${{ steps.get_tag.outputs.tag }}.jar
-          asset_name: modsman-packutil-${{ steps.get_tag.outputs.tag }}.zip
+          asset_name: modsman-packutil-${{ steps.get_tag.outputs.tag }}.jar
           asset_content_type: application/java-archive
