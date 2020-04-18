@@ -254,7 +254,7 @@ fun main(args: Array<String>) {
         .addCommand(ListCommand)
         .addCommand(ListOutdatedCommand)
         .build()
-    jc.programName = "modsman"
+    jc.programName = "modsman-cli"
 
     try {
         jc.parse(*args)
