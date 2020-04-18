@@ -84,14 +84,19 @@ internal object InitCommand : CommandBase() {
     var excludedGameVersions: List<String> = emptyList()
 
     override suspend fun run(jc: JCommander): Int {
-        ModlistManager.init(
-            Paths.get(RootCommand.modsFolder),
-            ModlistConfig(
-                requiredGameVersions = requiredGameVersions,
-                excludedGameVersions = excludedGameVersions
-            )
-        ).close()
-        return 0
+        try {
+            ModlistManager.init(
+                Paths.get(RootCommand.modsFolder),
+                ModlistConfig(
+                    requiredGameVersions = requiredGameVersions,
+                    excludedGameVersions = excludedGameVersions
+                )
+            ).close()
+            return 0
+        } catch (e: FileAlreadyExistsException) {
+            JCommander.getConsole().println("Already initialized; delete .modlist.json to re-init")
+            return 1
+        }
     }
 }
 
