@@ -14,9 +14,14 @@ data class ModEntry(
     val pinned: Boolean = false
 )
 
+enum class ReleaseCycle(val value: Int) {
+    RELEASE(1), BETA(2), ALPHA(3)
+}
+
 data class ModlistConfig(
-    val requiredGameVersions: List<String>,
-    val excludedGameVersions: List<String>
+    val requiredGameVersions: List<String> = emptyList(),
+    val excludedGameVersions: List<String> = emptyList(),
+    val releaseCycle: ReleaseCycle = ReleaseCycle.RELEASE
 )
 
 data class Modlist(
@@ -58,7 +63,7 @@ class ModlistManager(val modsPath: Path, modlist: Modlist) : Closeable {
         return mod
     }
 
-    fun save() {
+    override fun close() {
         Files.newBufferedWriter(modsPath.resolve(Modlist.fileName)).use { writer ->
             Modlist.gson.toJson(
                 Modlist(config = config, mods = modMap.values.toList()),
@@ -66,8 +71,6 @@ class ModlistManager(val modsPath: Path, modlist: Modlist) : Closeable {
             )
         }
     }
-
-    override fun close() = save()
 
     companion object {
         fun init(modsPath: Path, config: ModlistConfig): ModlistManager {

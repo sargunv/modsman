@@ -1,11 +1,8 @@
 {
   "config": {
-    "required_game_versions": [
-      "1.15"
-    ],
-    "excluded_game_versions": [
-      "Forge"
-    ]
+    "required_game_versions": [],
+    "excluded_game_versions": [],
+    "release_cycle": "RELEASE"
   },
   "mods": [
     {
@@ -13,13 +10,6 @@
       "project_name": "Fabric API",
       "file_id": 2898702,
       "file_name": "fabric-api-0.5.1+build.294-1.15.jar",
-      "pinned": false
-    },
-    {
-      "project_id": 308702,
-      "project_name": "Mod Menu (Fabric)",
-      "file_id": 2902148,
-      "file_name": "modmenu-1.10.2+build.32.jar",
       "pinned": false
     }
   ]

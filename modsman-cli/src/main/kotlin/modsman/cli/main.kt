@@ -8,10 +8,7 @@ import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.runBlocking
-import modsman.BuildConfig
-import modsman.ModlistConfig
-import modsman.ModlistManager
-import modsman.Modsman
+import modsman.*
 import java.nio.file.NoSuchFileException
 import java.nio.file.Paths
 import kotlin.system.exitProcess
@@ -73,15 +70,24 @@ internal object RootCommand : CommandBase() {
 internal object InitCommand : CommandBase() {
     @Parameter(
         names = ["--require-version", "-R"],
-        description = "required game version tag; specify multiple times for multiple versions"
+        description = "required game version tag; specify multiple times for multiple versions",
+        order = 0
     )
     var requiredGameVersions: List<String> = emptyList()
 
     @Parameter(
         names = ["--exclude-version", "-X"],
-        description = "excluded game version tag; specify multiple times for multiple versions"
+        description = "excluded game version tag; specify multiple times for multiple versions",
+        order = 1
     )
     var excludedGameVersions: List<String> = emptyList()
+
+    @Parameter(
+        names = ["--release-cycle", "-r"],
+        description = "the maximum allowed release type",
+        order = 2
+    )
+    var releaseCycle: ReleaseCycle = ReleaseCycle.RELEASE
 
     override suspend fun run(jc: JCommander): Int {
         try {
@@ -89,7 +95,8 @@ internal object InitCommand : CommandBase() {
                 Paths.get(RootCommand.modsFolder),
                 ModlistConfig(
                     requiredGameVersions = requiredGameVersions,
-                    excludedGameVersions = excludedGameVersions
+                    excludedGameVersions = excludedGameVersions,
+                    releaseCycle = ReleaseCycle.RELEASE
                 )
             ).close()
             return 0
