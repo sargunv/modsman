@@ -21,7 +21,7 @@ modsman-cli --help
 
 ## Usage
 
-Some basic knowledge of how to use the command line on your system is expected. The following commands will assume you're using Bash or PowerShell.
+Some basic knowledge of how to use the command line on your system is expected. The following commands will assume you're using Bash or PowerShell, but everything except the wildcard applies to CMD as well.
 
 ### Initialize Modsman
 
