@@ -19,9 +19,9 @@ enum class ReleaseCycle(val value: Int) {
 }
 
 data class ModlistConfig(
-    val requiredGameVersions: List<String> = emptyList(),
-    val excludedGameVersions: List<String> = emptyList(),
-    val releaseCycle: ReleaseCycle = ReleaseCycle.RELEASE
+    val requiredGameVersions: List<String>,
+    val excludedGameVersions: List<String>,
+    val releaseCycle: ReleaseCycle?
 )
 
 data class Modlist(

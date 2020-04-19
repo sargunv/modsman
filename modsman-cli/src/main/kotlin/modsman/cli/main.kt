@@ -87,7 +87,7 @@ internal object InitCommand : CommandBase() {
         description = "the maximum allowed release type",
         order = 2
     )
-    var releaseCycle: ReleaseCycle = ReleaseCycle.RELEASE
+    var releaseCycle: ReleaseCycle = ReleaseCycle.BETA
 
     override suspend fun run(jc: JCommander): Int {
         try {
@@ -96,7 +96,7 @@ internal object InitCommand : CommandBase() {
                 ModlistConfig(
                     requiredGameVersions = requiredGameVersions,
                     excludedGameVersions = excludedGameVersions,
-                    releaseCycle = ReleaseCycle.RELEASE
+                    releaseCycle = releaseCycle
                 )
             ).close()
             return 0

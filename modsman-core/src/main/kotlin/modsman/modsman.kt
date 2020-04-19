@@ -37,7 +37,7 @@ class Modsman(
             .filter { file ->
                 file.isAvailable &&
                     !file.isAlternate &&
-                    file.releaseType <= modlist.config.releaseCycle.value &&
+                    file.releaseType <= (modlist.config.releaseCycle ?: ReleaseCycle.ALPHA).value &&
                     modlist.config.requiredGameVersions.all { configVersion ->
                         file.gameVersion.any { fileVersion ->
                             configVersion in fileVersion
