@@ -19,6 +19,8 @@ scoop install modsman
 modsman-cli --help
 ```
 
+If you do not wish to use a package manager, you may download modsman from [GitHub Releases](https://github.com/sargunv/modsman/releases).
+
 ## Usage
 
 Some basic knowledge of how to use the command line on your system is expected. The following commands will assume you're using Bash or PowerShell, but everything except the wildcard applies to CMD as well.
